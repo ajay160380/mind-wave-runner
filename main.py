@@ -27,38 +27,40 @@ def main():
     
     # Main game loop
     running = True
+    game_active = True
+    
     while running:
         # 1. Event Handling
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
+                if event.key == pygame.K_SPACE and game_active:
                     player.jump()
         
-        # 2. Update Game State
-        player.update()
-        score += 1
-        
-        # Spawn obstacles at random intervals
-        spawn_timer += 1
-        if spawn_timer >= SPAWN_INTERVAL:
-            obstacles.append(Obstacle())
-            spawn_timer = 0
-            SPAWN_INTERVAL = random.randint(60, 120)
-        
-        # Update all obstacles, check collision, and remove off-screen ones
-        for obs in obstacles[:]:
-            obs.update()
+        if game_active:
+            # 2. Update Game State
+            player.update()
+            score += 1
             
-            # AABB Collision Detection
-            if player.rect.colliderect(obs.rect):
-                print(f"COLLISION! Final Score: {score // 10}")
-                running = False
-                break
+            # Spawn obstacles at random intervals
+            spawn_timer += 1
+            if spawn_timer >= SPAWN_INTERVAL:
+                obstacles.append(Obstacle())
+                spawn_timer = 0
+                SPAWN_INTERVAL = random.randint(60, 120)
             
-            if obs.is_off_screen():
-                obstacles.remove(obs)
+            # Update all obstacles, check collision, and remove off-screen ones
+            for obs in obstacles[:]:
+                obs.update()
+                
+                # AABB Collision Detection
+                if player.rect.colliderect(obs.rect):
+                    game_active = False
+                    break
+                
+                if obs.is_off_screen():
+                    obstacles.remove(obs)
         
         # 3. Render
         screen.fill(WHITE)
@@ -76,6 +78,12 @@ def main():
         # Draw Score
         score_text = font.render(f"Score: {score // 10}", True, BLACK)
         screen.blit(score_text, (20, 20))
+        
+        # Draw Game Over Text
+        if not game_active:
+            go_text = font.render("GAME OVER", True, RED)
+            go_rect = go_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+            screen.blit(go_text, go_rect)
         
         pygame.display.flip()
         
