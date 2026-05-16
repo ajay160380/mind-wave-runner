@@ -1,7 +1,9 @@
 import pygame
 import sys
+import random
 from settings import *
 from player import Player
+from obstacle import Obstacle
 
 def main():
     # Initialize Pygame
@@ -16,6 +18,9 @@ def main():
     
     # Initialize game objects
     player = Player()
+    obstacles = []
+    spawn_timer = 0
+    SPAWN_INTERVAL = random.randint(60, 120)  # Frames between spawns
     
     # Main game loop
     running = True
@@ -31,8 +36,30 @@ def main():
         # 2. Update Game State
         player.update()
         
+        # Spawn obstacles at random intervals
+        spawn_timer += 1
+        if spawn_timer >= SPAWN_INTERVAL:
+            obstacles.append(Obstacle())
+            spawn_timer = 0
+            SPAWN_INTERVAL = random.randint(60, 120)
+        
+        # Update all obstacles and remove off-screen ones
+        for obs in obstacles[:]:
+            obs.update()
+            if obs.is_off_screen():
+                obstacles.remove(obs)
+        
         # 3. Render
         screen.fill(WHITE)
+        
+        # Draw ground line
+        pygame.draw.line(screen, GRAY, (0, HEIGHT - 20), (WIDTH, HEIGHT - 20), 2)
+        
+        # Draw obstacles
+        for obs in obstacles:
+            obs.draw(screen)
+        
+        # Draw player
         player.draw(screen)
         
         pygame.display.flip()
