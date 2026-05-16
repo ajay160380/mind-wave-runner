@@ -43,9 +43,16 @@ def main():
             spawn_timer = 0
             SPAWN_INTERVAL = random.randint(60, 120)
         
-        # Update all obstacles and remove off-screen ones
+        # Update all obstacles, check collision, and remove off-screen ones
         for obs in obstacles[:]:
             obs.update()
+            
+            # AABB Collision Detection
+            if player.rect.colliderect(obs.rect):
+                print("COLLISION! Game Over!")
+                running = False
+                break
+            
             if obs.is_off_screen():
                 obstacles.remove(obs)
         
