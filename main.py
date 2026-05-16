@@ -1,6 +1,7 @@
 import pygame
 import sys
 from settings import *
+from player import Player
 
 def main():
     # Initialize Pygame
@@ -13,6 +14,9 @@ def main():
     # Set up the clock
     clock = pygame.time.Clock()
     
+    # Initialize game objects
+    player = Player()
+    
     # Main game loop
     running = True
     while running:
@@ -22,9 +26,12 @@ def main():
                 running = False
         
         # 2. Update Game State
+        player.update()
         
         # 3. Render
         screen.fill(WHITE)
+        player.draw(screen)
+        
         pygame.display.flip()
         
         # 4. Cap the frame rate
