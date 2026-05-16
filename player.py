@@ -31,5 +31,10 @@ class Player:
         self.rect.x = self.x
         self.rect.y = self.y
 
+    def jump(self):
+        # Only jump if on the ground
+        if self.y >= self.ground_y:
+            self.vel_y = -12
+
     def draw(self, screen):
         pygame.draw.rect(screen, self.color, self.rect)
