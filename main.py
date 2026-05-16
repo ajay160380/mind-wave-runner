@@ -8,6 +8,7 @@ from obstacle import Obstacle
 def main():
     # Initialize Pygame
     pygame.init()
+    pygame.font.init()
     
     # Set up the display
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -15,12 +16,14 @@ def main():
     
     # Set up the clock
     clock = pygame.time.Clock()
+    font = pygame.font.SysFont('Arial', 32, bold=True)
     
     # Initialize game objects
     player = Player()
     obstacles = []
     spawn_timer = 0
     SPAWN_INTERVAL = random.randint(60, 120)  # Frames between spawns
+    score = 0
     
     # Main game loop
     running = True
@@ -35,6 +38,7 @@ def main():
         
         # 2. Update Game State
         player.update()
+        score += 1
         
         # Spawn obstacles at random intervals
         spawn_timer += 1
@@ -49,7 +53,7 @@ def main():
             
             # AABB Collision Detection
             if player.rect.colliderect(obs.rect):
-                print("COLLISION! Game Over!")
+                print(f"COLLISION! Final Score: {score // 10}")
                 running = False
                 break
             
@@ -68,6 +72,10 @@ def main():
         
         # Draw player
         player.draw(screen)
+        
+        # Draw Score
+        score_text = font.render(f"Score: {score // 10}", True, BLACK)
+        screen.blit(score_text, (20, 20))
         
         pygame.display.flip()
         
