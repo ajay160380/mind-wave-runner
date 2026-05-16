@@ -37,6 +37,14 @@ def main():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE and game_active:
                     player.jump()
+                if event.key == pygame.K_r and not game_active:
+                    # Restart the game
+                    game_active = True
+                    obstacles.clear()
+                    score = 0
+                    spawn_timer = 0
+                    player.y = player.ground_y
+                    player.vel_y = 0
         
         if game_active:
             # 2. Update Game State
