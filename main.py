@@ -4,6 +4,7 @@ import random
 from settings import *
 from player import Player
 from obstacle import Obstacle
+from hand_tracker import HandTracker
 
 def main():
     # Initialize Pygame
@@ -25,11 +26,17 @@ def main():
     SPAWN_INTERVAL = random.randint(60, 120)  # Frames between spawns
     score = 0
     
+    # Initialize Hand Tracker
+    hand_tracker = HandTracker()
+    
     # Main game loop
     running = True
     game_active = True
     
     while running:
+        # Get gestures from webcam
+        is_jumping, is_ducking = hand_tracker.process_frame()
+        
         # 1. Event Handling
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -37,6 +44,10 @@ def main():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE and game_active:
                     player.jump()
+                if event.key == pygame.K_DOWN and game_active:
+                    player.duck()
+                if event.key == pygame.K_UP and game_active:
+                    player.unduck()
                 if event.key == pygame.K_r and not game_active:
                     # Restart the game
                     game_active = True
@@ -45,8 +56,17 @@ def main():
                     spawn_timer = 0
                     player.y = player.ground_y
                     player.vel_y = 0
+                    player.unduck()
         
         if game_active:
+            # Apply gestures
+            if is_jumping:
+                player.jump()
+            elif is_ducking:
+                player.duck()
+            else:
+                player.unduck()
+                
             # 2. Update Game State
             player.update()
             score += 1
@@ -98,6 +118,7 @@ def main():
         # 4. Cap the frame rate
         clock.tick(FPS)
     
+    hand_tracker.release()
     pygame.quit()
     sys.exit()
 
