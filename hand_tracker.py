@@ -15,6 +15,13 @@ class HandTracker:
         image = cv2.flip(image, 1)
         image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         results = self.hands.process(image_rgb)
+        
+        if results.multi_hand_landmarks:
+            for hand_landmarks in results.multi_hand_landmarks:
+                wrist_y = hand_landmarks.landmark[0].y
+                index_mcp_y = hand_landmarks.landmark[5].y
+                index_tip_y = hand_landmarks.landmark[8].y
+        
         return False, False
         
     def release(self):
