@@ -17,6 +17,8 @@ class HandTracker:
         image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         results = self.hands.process(image_rgb)
         
+        is_jumping = False
+        
         if results.multi_hand_landmarks:
             for hand_landmarks in results.multi_hand_landmarks:
                 self.mp_draw.draw_landmarks(image, hand_landmarks, self.mp_hands.HAND_CONNECTIONS)
@@ -24,9 +26,12 @@ class HandTracker:
                 index_mcp_y = hand_landmarks.landmark[5].y
                 index_tip_y = hand_landmarks.landmark[8].y
                 
+                if index_tip_y < index_mcp_y - 0.1:
+                    is_jumping = True
+                
         cv2.imshow("Hand Tracking (Debug)", image)
         cv2.waitKey(1)
-        return False, False
+        return is_jumping, False
         
     def release(self):
         self.cap.release()
