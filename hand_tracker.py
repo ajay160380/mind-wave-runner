@@ -8,6 +8,7 @@ class HandTracker:
         self.hands = self.mp_hands.Hands(
             static_image_mode=False, max_num_hands=1,
             min_detection_confidence=0.5, min_tracking_confidence=0.5)
+        self.mp_draw = mp.solutions.drawing_utils
         
     def process_frame(self):
         success, image = self.cap.read()
@@ -18,11 +19,15 @@ class HandTracker:
         
         if results.multi_hand_landmarks:
             for hand_landmarks in results.multi_hand_landmarks:
+                self.mp_draw.draw_landmarks(image, hand_landmarks, self.mp_hands.HAND_CONNECTIONS)
                 wrist_y = hand_landmarks.landmark[0].y
                 index_mcp_y = hand_landmarks.landmark[5].y
                 index_tip_y = hand_landmarks.landmark[8].y
-        
+                
+        cv2.imshow("Hand Tracking (Debug)", image)
+        cv2.waitKey(1)
         return False, False
         
     def release(self):
         self.cap.release()
+        cv2.destroyAllWindows()
