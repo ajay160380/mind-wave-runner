@@ -4,6 +4,7 @@ import math
 import random
 import subprocess
 import os
+from settings import resource_path
 
 def synthesize_jump(filepath="assets/jump.wav"):
     sample_rate = 22050
@@ -110,7 +111,7 @@ def initialize_audio():
 
 def play_sound(sound_name):
     """Play the synthesized wave file in the background using macOS afplay."""
-    sound_path = f"assets/{sound_name}.wav"
+    sound_path = resource_path(f"assets/{sound_name}.wav")
     if os.path.exists(sound_path):
         try:
             # Popen spawns a non-blocking background shell to run afplay

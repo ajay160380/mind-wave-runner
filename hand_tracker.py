@@ -4,6 +4,7 @@ import pygame
 import threading
 import time
 import math
+from settings import resource_path
 
 class HandTracker:
     def __init__(self):
@@ -17,7 +18,7 @@ class HandTracker:
         VisionRunningMode = mp.tasks.vision.RunningMode
         
         options = HandLandmarkerOptions(
-            base_options=BaseOptions(model_asset_path='hand_landmarker.task'),
+            base_options=BaseOptions(model_asset_path=resource_path('hand_landmarker.task')),
             running_mode=VisionRunningMode.IMAGE
         )
         self.landmarker = HandLandmarker.create_from_options(options)

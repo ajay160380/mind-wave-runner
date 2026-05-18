@@ -35,17 +35,19 @@ class SparkParticle:
             surface.blit(p_surf, (int(self.x), int(self.y)))
 
 def load_high_score():
-    if os.path.exists("highscore.txt"):
+    path = os.path.expanduser("~/.mind_wave_dino_highscore.txt")
+    if os.path.exists(path):
         try:
-            with open("highscore.txt", "r") as f:
+            with open(path, "r") as f:
                 return int(f.read().strip())
         except Exception:
             return 0
     return 0
 
 def save_high_score(score):
+    path = os.path.expanduser("~/.mind_wave_dino_highscore.txt")
     try:
-        with open("highscore.txt", "w") as f:
+        with open(path, "w") as f:
             f.write(str(score))
     except Exception as e:
         print(f"Error saving highscore: {e}")
