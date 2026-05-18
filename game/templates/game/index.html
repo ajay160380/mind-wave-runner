@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mind-Wave Dino Runner - Web Portal</title>
+    <!-- Premium Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Press+Start+2P&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <!-- MediaPipe Javascript libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+    
+    <style>
+        :root {
+            --neon-pink: #ff007f;
+            --neon-blue: #00f0ff;
+            --neon-gold: #f5a623;
+            --dark-bg: #09090e;
+            --panel-bg: rgba(20, 20, 35, 0.6);
+            --border-color: rgba(0, 240, 255, 0.25);
+            --dino-dark: #333338;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: #ffffff;
+            font-family: 'Outfit', sans-serif;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(at 10% 20%, rgba(255, 0, 127, 0.15) 0px, transparent 50%),
+                radial-gradient(at 90% 80%, rgba(0, 240, 255, 0.15) 0px, transparent 50%);
+        }
+
+        header {
+            width: 100%;
+            max-width: 1200px;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            letter-spacing: 2px;
+            font-size: 1.8rem;
+            background: linear-gradient(45deg, var(--neon-blue), var(--neon-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+        }
+
+        .version-badge {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background: var(--neon-pink);
+            box-shadow: 0 0 8px var(--neon-pink);
+            margin-left: 10px;
+            display: inline-block;
+        }
+
+        main {
+            display: grid;
+            grid-template-columns: 800px 360px;
+            gap: 24px;
+            width: 100%;
+            max-width: 1184px;
+            margin: 25px auto;
+            padding: 0 20px;
+        }
+
+        /* Glassmorphic Panel Layouts */
+        .glass-panel {
+            background: var(--panel-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-pink));
+        }
+
+        /* Game Screen container */
+        .game-wrapper {
+            position: relative;
+        }
+
+        #game-canvas {
+            display: block;
+            border-radius: 8px;
+            background: #ffffff;
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.5);
+            width: 760px;
+            height: 400px;
+        }
+
+        /* Side Dashboard (WebCam + Leaderboard) */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .webcam-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .webcam-container {
+            width: 100%;
+            height: 180px;
+            position: relative;
+            border-radius: 8px;
+            background: #000;
+            border: 2px solid var(--dino-dark);
+            overflow: hidden;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8);
+        }
+
+        #webcam-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1); /* Mirror camera */
+        }
+
+        #webcam-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-transform: 10;
+            transform: scaleX(-1);
+        }
+
+        .status-pill {
+            margin-top: 12px;
+            width: 100%;
+            padding: 8px;
+            text-align: center;
+            border-radius: 6px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            background: var(--dino-dark);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        }
+
+        .status-active-jump {
+            background: #00963c !important;
+            box-shadow: 0 0 12px #00963c !important;
+            color: #fff !important;
+        }
+
+        .status-active-duck {
+            background: #b45000 !important;
+            box-shadow: 0 0 12px #b45000 !important;
+            color: #fff !important;
+        }
+
+        .status-offline {
+            background: #7a2214 !important;
+            box-shadow: 0 0 8px #7a2214 !important;
+            animation: pulse-offline 1.5s infinite;
+        }
+
+        @keyframes pulse-offline {
+            0% { opacity: 0.8; }
+            50% { opacity: 1; }
+            100% { opacity: 0.8; }
+        }
+
+        /* Leaderboard Panel styling */
+        .leaderboard-title {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--neon-blue);
+        }
+
+        .leaderboard-list {
+            list-style: none;
+            width: 100%;
+            max-height: 240px;
+            overflow-y: auto;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.03);
+            margin-bottom: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.9rem;
+            transition: transform 0.2s ease;
+        }
+
+        .leaderboard-item:hover {
+            transform: translateX(4px);
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(0, 240, 255, 0.15);
+        }
+
+        .rank-badge {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--dino-dark);
+            border-radius: 50%;
+            font-size: 0.75rem;
+            margin-right: 8px;
+        }
+
+        .rank-1 { background: var(--neon-gold); color: #000; box-shadow: 0 0 8px var(--neon-gold); }
+        .rank-2 { background: #b5c7d3; color: #000; }
+        .rank-3 { background: #cd7f32; color: #000; }
+
+        .player-score {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.7rem;
+            color: var(--neon-blue);
+        }
+
+        /* Game Over Highscore Pop-up overlay */
+        .game-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 760px;
+            height: 400px;
+            border-radius: 8px;
+            background: rgba(9, 9, 14, 0.85);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+            display: none; /* Controlled via JS */
+        }
+
+        .overlay-title {
+            font-family: 'Press Start 2P', cursive;
+            color: var(--neon-pink);
+            font-size: 1.6rem;
+            margin-bottom: 20px;
+            text-shadow: 0 0 15px rgba(255, 0, 127, 0.6);
+            letter-spacing: 2px;
+        }
+
+        .score-display-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            padding: 12px 24px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .score-lbl {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #888899;
+        }
+
+        .score-val {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: var(--neon-blue);
+        }
+
+        .save-form {
+            display: flex;
+            flex-direction: column;
+            width: 300px;
+            gap: 10px;
+        }
+
+        .name-input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background: rgba(10, 10, 15, 0.9);
+            color: #fff;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            text-align: center;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .name-input:focus {
+            border-color: var(--neon-pink);
+            box-shadow: 0 0 10px rgba(255,0,127,0.3);
+        }
+
+        .submit-btn {
+            background: linear-gradient(45deg, var(--neon-blue), var(--neon-pink));
+            color: #fff;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 240, 255, 0.25);
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 0, 127, 0.4);
+        }
+
+        .bottom-hud {
+            width: 100%;
+            max-width: 1184px;
+            padding: 10px 20px;
+            font-size: 0.75rem;
+            font-family: 'Orbitron', sans-serif;
+            display: flex;
+            justify-content: space-between;
+            color: #666688;
+            border-top: 1px solid var(--border-color);
+            margin-top: auto;
+            margin-bottom: 20px;
+        }
+
+        .connection-status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #7a2214;
+            display: inline-block;
+            margin-right: 6px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div>
+            <h1>MIND-WAVE DINO RUNNER<span class="version-badge">WEB PORTAL v1.0</span></h1>
+        </div>
+        <div style="font-family: 'Orbitron', sans-serif; font-size: 0.8rem; color: var(--neon-blue); letter-spacing: 1px;">
+            SYSTEM PROTOCOL ONLINE
+        </div>
+    </header>
+
+    <main>
+        <!-- Main Game Section -->
+        <div class="glass-panel game-wrapper">
+            <canvas id="game-canvas" width="760" height="400"></canvas>
+            
+            <!-- Game Over & Leaderboard Submission Overlay -->
+            <div id="gameover-overlay" class="game-overlay">
+                <div class="overlay-title">SYSTEM FAIL</div>
+                <div class="score-display-box">
+                    <div class="score-lbl">FINAL CORE INTEGRITY</div>
+                    <div id="final-score" class="score-val">00000</div>
+                </div>
+                <form id="score-form" class="save-form" onsubmit="submitScore(event)">
+                    <input type="text" id="player-name-input" class="name-input" placeholder="ENTER PILOT SIGNATURE" maxlength="20" required autocomplete="off">
+                    <button type="submit" class="submit-btn">UPLOAD DATA CORE</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Sidebar Section -->
+        <div class="sidebar">
+            <!-- Webcam PIP Panel -->
+            <div class="glass-panel webcam-card">
+                <div class="leaderboard-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                    WEBCAM TELEMETRY
+                </div>
+                <div class="webcam-container">
+                    <video id="webcam-video" autoplay playsinline></video>
+                    <canvas id="webcam-overlay" width="160" height="120"></canvas>
+                </div>
+                <div id="telemetry-pill" class="status-pill status-offline">
+                    WEBCAM OFFLINE
+                </div>
+            </div>
+
+            <!-- Leaderboard Score Panel -->
+            <div class="glass-panel">
+                <div class="leaderboard-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="7"></circle><polyline points="82 11.5 10.5 10 12.5 12.5 14 10 16 11.5"></polyline><path d="M12 15H12.01"></path></svg>
+                    GLOBAL DATA CORES
+                </div>
+                <ul id="leaderboard-list-ul" class="leaderboard-list">
+                    <!-- Loaded dynamically via AJAX -->
+                    <li style="text-align: center; color: #666; padding: 20px;">Fetching global telemetry...</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+
+    <div class="bottom-hud">
+        <div>
+            <span id="conn-dot" class="connection-status-dot"></span>
+            INTERFACE STATUS: <span id="conn-text">KEYBOARD OVERRIDE ENGAGED [MANUAL CONTROL]</span>
+        </div>
+        <div>
+            MIND-WAVE CONTROL: [OPEN HAND = JUMP] &nbsp; | &nbsp; [FIST = DUCK/SLIDE]
+        </div>
+    </div>
+
+    <!-- Retro Synthesized Audio & HTML5 Game Logic -->
+    <script>
+        // --- Retro Audio Synthesizer via Web Audio API ---
+        class SynthAudio {
+            constructor() {
+                this.ctx = null;
+            }
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            }
+            playJump() {
+                this.init(); if (!this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.connect(gain); gain.connect(this.ctx.destination);
+                
+                osc.type = 'square';
+                const now = this.ctx.currentTime;
+                // Rising pitch sweep
+                osc.frequency.setValueAtTime(200, now);
+                osc.frequency.exponentialRampToValueAtTime(900, now + 0.15);
+                
+                gain.gain.setValueAtTime(0.08, now);
+                gain.gain.linearRampToValueAtTime(0.0, now + 0.15);
+                
+                osc.start(now);
+                osc.stop(now + 0.15);
+            }
+            playSlide() {
+                this.init(); if (!this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.connect(gain); gain.connect(this.ctx.destination);
+                
+                osc.type = 'sawtooth';
+                const now = this.ctx.currentTime;
+                // Buzzing pitch falling down
+                osc.frequency.setValueAtTime(160, now);
+                osc.frequency.linearRampToValueAtTime(80, now + 0.25);
+                
+                gain.gain.setValueAtTime(0.12, now);
+                gain.gain.linearRampToValueAtTime(0.0, now + 0.25);
+                
+                osc.start(now);
+                osc.stop(now + 0.25);
+            }
+            playPickup() {
+                this.init(); if (!this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.connect(gain); gain.connect(this.ctx.destination);
+                
+                osc.type = 'sine';
+                const now = this.ctx.currentTime;
+                // Double chime (Note E to Note B)
+                osc.frequency.setValueAtTime(659, now); // Note E5
+                osc.frequency.setValueAtTime(987, now + 0.08); // Note B5
+                
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.linearRampToValueAtTime(0.0, now + 0.25);
+                
+                osc.start(now);
+                osc.stop(now + 0.25);
+            }
+            playCrash() {
+                this.init(); if (!this.ctx) return;
+                // Create Noise buffer for white noise explosive rumble
+                const bufferSize = this.ctx.sampleRate * 0.4;
+                const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    data[i] = Math.random() * 2 - 1;
+                }
+                const noiseNode = this.ctx.createBufferSource();
+                noiseNode.buffer = buffer;
+                
+                const filter = this.ctx.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.setValueAtTime(800, this.ctx.currentTime);
+                filter.frequency.exponentialRampToValueAtTime(50, this.ctx.currentTime + 0.4);
+                
+                const gain = this.ctx.createGain();
+                gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.0, this.ctx.currentTime + 0.4);
+                
+                noiseNode.connect(filter);
+                filter.connect(gain);
+                gain.connect(this.ctx.destination);
+                
+                noiseNode.start();
+                noiseNode.stop(this.ctx.currentTime + 0.4);
+            }
+        }
+        
+        const audio = new SynthAudio();
+
+        // --- HTML5 canvas retro synthwave dino game ---
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Colors matching Python theme
+        const DINO_DARK = '#535353';
+        const DINO_LIGHT = '#f7f7f7';
+        const DINO_GOLD = '#f5a623';
+        const DINO_WHITE = '#ffffff';
+
+        let gameState = 0; // 0: MENU, 1: PLAYING, 2: GAMEOVER
+        let score = 0;
+        let highScore = 0;
+        let gameSpeed = 5.6;
+        let screenShake = 0;
+        
+        // Parallax scroll positions
+        let starsX = 0;
+        let mountainsX = 0;
+        let floorX = 0;
+        
+        // Game lists
+        let obstacles = [];
+        let collectibles = [];
+        let particles = [];
+        
+        // Timers
+        let spawnTimer = 0;
+        let nextSpawnDistance = 1000;
+        let collectibleTimer = 0;
+        let collectibleInterval = 140;
+
+        // Player definitions
+        const player = {
+            x: 80,
+            y: 245,
+            width: 44,
+            height: 55,
+            groundY: 245,
+            velY: 0,
+            gravity: 0.6,
+            jumpStrength: -11.5,
+            isJumping: false,
+            isDucking: false,
+            
+            jump() {
+                if (!this.isJumping && !this.isDucking) {
+                    this.velY = this.jumpStrength;
+                    this.isJumping = true;
+                    audio.playJump();
+                    // Emit particles
+                    for(let i=0; i<10; i++) {
+                        particles.push(new SparkParticle(this.x + 20, this.groundY + 55, DINO_DARK));
+                    }
+                }
+            },
+            
+            duck() {
+                if (!this.isJumping && !this.isDucking) {
+                    this.isDucking = true;
+                    this.height = 30;
+                    this.y = this.groundY + 25;
+                    audio.playSlide();
+                }
+            },
+            
+            unduck() {
+                if (this.isDucking) {
+                    this.isDucking = false;
+                    this.height = 55;
+                    this.y = this.groundY;
+                }
+            },
+            
+            update() {
+                // Apply physics
+                if (this.isJumping) {
+                    this.velY += this.gravity;
+                    this.y += this.velY;
+                    if (this.y >= this.groundY) {
+                        this.y = this.groundY;
+                        this.velY = 0;
+                        this.isJumping = false;
+                    }
+                }
+            },
+            
+            draw(ctx) {
+                ctx.fillStyle = DINO_DARK;
+                // Draw neon vector-like retro dinosaur box
+                if (this.isDucking) {
+                    ctx.beginPath();
+                    ctx.roundRect(this.x, this.y, this.width + 10, this.height, 6);
+                    ctx.fill();
+                    // Draw eye
+                    ctx.fillStyle = DINO_WHITE;
+                    ctx.fillRect(this.x + 36, this.y + 6, 4, 4);
+                } else {
+                    ctx.beginPath();
+                    ctx.roundRect(this.x, this.y, this.width, this.height, 8);
+                    ctx.fill();
+                    // Head shape block
+                    ctx.fillRect(this.x + 12, this.y - 12, 32, 20);
+                    // Draw eye
+                    ctx.fillStyle = DINO_WHITE;
+                    ctx.fillRect(this.x + 32, this.y - 6, 4, 4);
+                }
+            }
+        };
+
+        // --- Collectible class ---
+        class Collectible {
+            constructor() {
+                this.x = canvas.width + 100;
+                this.y = Math.random() < 0.5 ? player.groundY + 20 : player.groundY - 60;
+                this.size = 20;
+                this.speed = gameSpeed;
+            }
+            update() {
+                this.x -= gameSpeed;
+            }
+            draw(ctx) {
+                ctx.fillStyle = DINO_GOLD;
+                ctx.beginPath();
+                // Draw diamond shape
+                ctx.moveTo(this.x, this.y - this.size/2);
+                ctx.lineTo(this.x + this.size/2, this.y);
+                ctx.lineTo(this.x, this.y + this.size/2);
+                ctx.lineTo(this.x - this.size/2, this.y);
+                ctx.closePath();
+                ctx.fill();
+                
+                // Add soft neon gold halo ring
+                ctx.strokeStyle = 'rgba(245, 166, 35, 0.4)';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+        }
+
+        // --- Obstacle class ---
+        class Obstacle {
+            constructor() {
+                this.x = canvas.width + 100;
+                this.type = Math.random() < 0.4 ? 'flying' : 'cactus';
+                if (this.type === 'flying') {
+                    this.y = player.groundY - 50;
+                    this.width = 32;
+                    this.height = 20;
+                } else {
+                    this.y = player.groundY + 10;
+                    this.width = 24;
+                    this.height = 45;
+                }
+            }
+            update() {
+                this.x -= gameSpeed;
+            }
+            draw(ctx) {
+                ctx.fillStyle = DINO_DARK;
+                ctx.beginPath();
+                if (this.type === 'flying') {
+                    ctx.roundRect(this.x, this.y, this.width, this.height, 4);
+                    ctx.fill();
+                    // Red wings outline
+                    ctx.strokeStyle = '#ff003c';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                } else {
+                    // Cactus vertical line
+                    ctx.roundRect(this.x, this.y, this.width, this.height, 4);
+                    ctx.fill();
+                    // Drawing thorns
+                    ctx.fillRect(this.x - 6, this.y + 12, 6, 6);
+                    ctx.fillRect(this.x + this.width, this.y + 18, 6, 6);
+                }
+            }
+        }
+
+        // --- Neon Particle System ---
+        class SparkParticle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.vx = (Math.random() - 0.5) * 6;
+                this.vy = (Math.random() - 0.5) * 6 - 2;
+                this.color = color;
+                this.life = 255;
+                this.decay = Math.random() * 8 + 6;
+                this.size = Math.random() * 3 + 2;
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.life -= this.decay;
+            }
+            draw(ctx) {
+                if (this.life <= 0) return;
+                ctx.fillStyle = this.color;
+                ctx.globalAlpha = this.life / 255;
+                ctx.fillRect(this.x, this.y, this.size, this.size);
+                ctx.globalAlpha = 1.0;
+            }
+        }
+
+        // --- Custom Drawing Vector Backgrounds (Instant Neon retro visual style) ---
+        function drawParallaxBackgrounds(ctx) {
+            // Layer 1: Pitch Black sky + Neon Gradients
+            ctx.fillStyle = '#09090e';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Neon pink horizontal sweep skyline glow
+            let grad = ctx.createLinearGradient(0, 180, 0, 300);
+            grad.addColorStop(0, 'rgba(255, 0, 127, 0.0)');
+            grad.addColorStop(1, 'rgba(255, 0, 127, 0.12)');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 180, canvas.width, 120);
+
+            // Parallax Stars (Moving extremely slow)
+            ctx.fillStyle = '#8c9bb4';
+            for (let i = 0; i < 30; i++) {
+                let starX = (starsX + i * 130) % (canvas.width + 100) - 50;
+                ctx.fillRect(starX, (i * 17) % 180 + 15, 2, 2);
+            }
+
+            // Layer 2: Moving Cyber Mountains with glowing neon peaks
+            ctx.strokeStyle = 'rgba(0, 240, 255, 0.15)';
+            ctx.lineWidth = 1.5;
+            for (let i = 0; i < 5; i++) {
+                let mountX = (mountainsX + i * 220) % (canvas.width + 300) - 200;
+                ctx.beginPath();
+                ctx.moveTo(mountX, 300);
+                ctx.lineTo(mountX + 80, 160);
+                ctx.lineTo(mountX + 160, 300);
+                ctx.stroke();
+                
+                // Peak Neon Spot glow
+                ctx.fillStyle = 'rgba(0, 240, 255, 0.4)';
+                ctx.beginPath();
+                ctx.arc(mountX + 80, 160, 3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Ground Base Line (Cyber Grid structure)
+            ctx.strokeStyle = DINO_DARK;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(0, 300);
+            ctx.lineTo(canvas.width, 300);
+            ctx.stroke();
+            
+            // Scrolling floor grid lines (Scaling 3D projection)
+            ctx.strokeStyle = 'rgba(83, 83, 83, 0.3)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < canvas.width; i += 40) {
+                let gridX = (floorX + i) % (canvas.width + 80) - 40;
+                ctx.beginPath();
+                ctx.moveTo(gridX, 300);
+                ctx.lineTo(gridX - 25, canvas.height);
+                ctx.stroke();
+            }
+        }
+
+        // --- Core Game loop ---
+        function updateGame() {
+            if (gameState === 1) { // PLAYING
+                player.update();
+                score += 1;
+                
+                // Acceleration progression capping
+                gameSpeed = 5.6 + Math.floor(score / 180) * 0.4;
+                if (gameSpeed > 11.5) gameSpeed = 11.5;
+                
+                // Scroll backgrounds
+                starsX -= 0.05 * gameSpeed;
+                mountainsX -= 0.2 * gameSpeed;
+                floorX -= 1.0 * gameSpeed;
+                
+                // Spawning sparks dust trail under running player
+                if (!player.isJumping) {
+                    if (player.isDucking) {
+                        if (Math.random() < 0.6) particles.push(new SparkParticle(player.x + 5, player.groundY + 28, DINO_DARK));
+                    } else {
+                        if (Math.random() < 0.3) particles.push(new SparkParticle(player.x + 10, player.groundY + 55, DINO_DARK));
+                    }
+                }
+                
+                // Obstacles spawners
+                spawnTimer += gameSpeed;
+                if (spawnTimer >= nextSpawnDistance) {
+                    obstacles.push(new Obstacle());
+                    spawnTimer = 0;
+                    nextSpawnDistance = 850 + Math.random() * 450;
+                }
+                
+                // Collectibles spawners
+                collectibleTimer++;
+                if (collectibleTimer >= collectibleInterval) {
+                    collectibles.push(new Collectible());
+                    collectibleTimer = 0;
+                    collectibleInterval = 120 + Math.random() * 80;
+                }
+                
+                // Update collectibles
+                for (let i = collectibles.length - 1; i >= 0; i--) {
+                    let col = collectibles[i];
+                    col.update();
+                    
+                    // Collision check
+                    let playerRect = {x: player.x, y: player.y, w: player.width, h: player.height};
+                    if (checkRectCollision(playerRect, {x: col.x - col.size/2, y: col.y - col.size/2, w: col.size, h: col.size})) {
+                        score += 500; // Big point core collection
+                        audio.playPickup();
+                        for (let p=0; p<12; p++) particles.push(new SparkParticle(col.x, col.y, DINO_GOLD));
+                        collectibles.splice(i, 1);
+                    } else if (col.x < -50) {
+                        collectibles.splice(i, 1);
+                    }
+                }
+                
+                // Update obstacles & Check crash
+                for (let i = obstacles.length - 1; i >= 0; i--) {
+                    let obs = obstacles[i];
+                    obs.update();
+                    
+                    let playerRect = {x: player.x, y: player.y, w: player.width, h: player.height};
+                    if (checkRectCollision(playerRect, {x: obs.x, y: obs.y, w: obs.width, h: obs.height})) {
+                        // Crash impact!
+                        gameState = 2; // GAMEOVER
+                        screenShake = 15;
+                        audio.playCrash();
+                        
+                        // Emit crash debris explosion
+                        for (let p=0; p<30; p++) {
+                            particles.push(new SparkParticle(player.x + 20, player.y + 20, DINO_DARK));
+                        }
+                        
+                        triggerGameOver();
+                        break;
+                    } else if (obs.x < -50) {
+                        obstacles.splice(i, 1);
+                    }
+                }
+            } else {
+                // Ambient scroll in menu/gameover state
+                starsX -= 0.1;
+                mountainsX -= 0.3;
+                floorX -= 1.0;
+            }
+            
+            // Update particles
+            for (let i = particles.length - 1; i >= 0; i--) {
+                let p = particles[i];
+                p.update();
+                if (p.life <= 0) particles.splice(i, 1);
+            }
+        }
+        
+        function checkRectCollision(r1, r2) {
+            return r1.x < r2.x + r2.w &&
+                   r1.x + r1.w > r2.x &&
+                   r1.y < r2.y + r2.h &&
+                   r1.y + r1.h > r2.y;
+        }
+
+        // --- Render Frame Function ---
+        function renderGame() {
+            ctx.save();
+            // Screen shake translation
+            if (screenShake > 0) {
+                let dx = (Math.random() - 0.5) * 8;
+                let dy = (Math.random() - 0.5) * 8;
+                ctx.translate(dx, dy);
+                screenShake--;
+            }
+            
+            // Draw backgrounds
+            drawParallaxBackgrounds(ctx);
+            
+            // Draw game entities
+            collectibles.forEach(col => col.draw(ctx));
+            obstacles.forEach(obs => obs.draw(ctx));
+            player.draw(ctx);
+            particles.forEach(p => p.draw(ctx));
+            
+            // Draw State-specific HUDs on Canvas
+            if (gameState === 0) { // MENU STATE
+                // logo
+                let bobOffset = Math.sin(Date.now() * 0.006) * 6;
+                ctx.fillStyle = DINO_DARK;
+                ctx.font = '900 24px "Orbitron"';
+                ctx.textAlign = 'center';
+                ctx.fillText('MIND-WAVE DINO RUNNER', canvas.width/2, 80 + bobOffset);
+                
+                // Instruction dashboard box
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+                ctx.strokeStyle = DINO_DARK;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.roundRect(canvas.width/2 - 260, 120, 520, 140, 10);
+                ctx.fill();
+                ctx.stroke();
+                
+                // Left stripe decoration
+                ctx.fillStyle = DINO_DARK;
+                ctx.beginPath();
+                ctx.roundRect(canvas.width/2 - 260, 120, 10, 140, {tl: 10, bl: 10});
+                ctx.fill();
+                
+                ctx.fillStyle = DINO_DARK;
+                ctx.font = 'bold 11px "Press Start 2P"';
+                ctx.textAlign = 'left';
+                ctx.fillText('WEBCAM GESTURE SYSTEM PROTOCOL', canvas.width/2 - 230, 148);
+                
+                ctx.font = '12px "Outfit"';
+                ctx.fillText('1. WEBCAM INTERFACE: Open Hand to JUMP | Fist to DUCK/SLIDE', canvas.width/2 - 230, 178);
+                ctx.fillText('2. KEYBOARD INTERFACE: SPACEBAR to JUMP | DOWN ARROW to SLIDE', canvas.width/2 - 230, 203);
+                
+                ctx.fillStyle = '#777788';
+                ctx.font = 'italic 11px "Outfit"';
+                ctx.fillText('Keep hand steady and clearly visible inside the telemetry box.', canvas.width/2 - 230, 238);
+                
+                // Blinking prompt
+                if (Math.floor(Date.now() / 350) % 2 === 0) {
+                    ctx.fillStyle = DINO_DARK;
+                    ctx.font = 'bold 13px "Press Start 2P"';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('PRESS SPACEBAR TO INITIALIZE CORE', canvas.width/2, 310);
+                }
+            } else if (gameState === 1) { // PLAYING STATE
+                // Draw live score HUD
+                ctx.fillStyle = DINO_DARK;
+                ctx.font = 'bold 14px "Press Start 2P"';
+                ctx.textAlign = 'left';
+                ctx.fillText('SCORE: ' + Math.floor(score/10), 20, 36);
+                
+                ctx.font = 'bold 12px "Orbitron"';
+                ctx.fillText('SPEED: ' + Math.floor(gameSpeed * 10) + '%', 20, 65);
+            }
+            
+            ctx.restore();
+        }
+
+        // Global Loop
+        function gameLoop() {
+            updateGame();
+            renderGame();
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // Start Loop
+        requestAnimationFrame(gameLoop);
+
+        // --- Keyboard Controls ---
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                if (gameState === 0) {
+                    startGame();
+                } else if (gameState === 1) {
+                    player.jump();
+                } else if (gameState === 2) {
+                    restartGame();
+                }
+            }
+            if (e.code === 'ArrowDown' && gameState === 1) {
+                e.preventDefault();
+                player.duck();
+            }
+        });
+        
+        window.addEventListener('keyup', (e) => {
+            if (e.code === 'ArrowDown' && gameState === 1) {
+                player.unduck();
+            }
+        });
+
+        function startGame() {
+            gameState = 1;
+            score = 0;
+            gameSpeed = 5.6;
+            obstacles = [];
+            collectibles = [];
+            particles = [];
+            player.y = player.groundY;
+            player.unduck();
+            document.getElementById('gameover-overlay').style.display = 'none';
+            audio.playPickup();
+        }
+        
+        function restartGame() {
+            startGame();
+        }
+        
+        function triggerGameOver() {
+            document.getElementById('final-score').innerText = Math.floor(score / 10);
+            document.getElementById('gameover-overlay').style.display = 'flex';
+            document.getElementById('player-name-input').focus();
+        }
+
+        // --- Django HighScore Database Communication APIs ---
+        function loadLeaderboard() {
+            fetch('/api/leaderboard/')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        const ul = document.getElementById('leaderboard-list-ul');
+                        ul.innerHTML = '';
+                        
+                        if (data.leaderboard.length === 0) {
+                            ul.innerHTML = '<li style="text-align: center; color: #666; padding: 20px;">No highscores yet. Be the first!</li>';
+                            return;
+                        }
+                        
+                        data.leaderboard.forEach((item, index) => {
+                            let rankClass = '';
+                            if (index === 0) rankClass = 'rank-1';
+                            else if (index === 1) rankClass = 'rank-2';
+                            else if (index === 2) rankClass = 'rank-3';
+                            
+                            ul.innerHTML += `
+                                <li class="leaderboard-item">
+                                    <div style="display: flex; align-items: center;">
+                                        <span class="rank-badge ${rankClass}">${index + 1}</span>
+                                        <span style="font-weight: 600; text-transform: uppercase;">${item.player_name}</span>
+                                    </div>
+                                    <span class="player-score">${item.score}</span>
+                                </li>
+                            `;
+                        });
+                    }
+                })
+                .catch(err => console.error("Error fetching leaderboard: ", err));
+        }
+
+        function submitScore(event) {
+            event.preventDefault();
+            const nameInput = document.getElementById('player-name-input');
+            const playerName = nameInput.value.trim();
+            const finalScore = Math.floor(score / 10);
+            
+            if (!playerName) return;
+            
+            // AJAX Post request to Django db backend
+            fetch('/api/save_score/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken') // standard Django CSRF token handling
+                },
+                body: JSON.stringify({
+                    player_name: playerName,
+                    score: finalScore
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Refresh and highlight scoreboard
+                    loadLeaderboard();
+                    // Reset game over and go back to menu
+                    gameState = 0;
+                    document.getElementById('gameover-overlay').style.display = 'none';
+                    nameInput.value = '';
+                }
+            })
+            .catch(err => console.error("Error uploading highscore: ", err));
+        }
+
+        // CSRF Token Helper
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Initial Load
+        loadLeaderboard();
+
+        // --- Client-side MediaPipe Hand Gesture Recognition API ---
+        const videoElement = document.getElementById('webcam-video');
+        const overlayCanvas = document.getElementById('webcam-overlay');
+        const overlayCtx = overlayCanvas.getContext('2d');
+        const telemetryPill = document.getElementById('telemetry-pill');
+        const connDot = document.getElementById('conn-dot');
+        const connText = document.getElementById('conn-text');
+
+        let isWebcamActive = false;
+
+        function onResults(results) {
+            // Draw camera frame mirroring overlay
+            overlayCtx.save();
+            overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+            
+            // Draw custom overlay hand tracking landmarks
+            if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                isWebcamActive = true;
+                connDot.style.background = '#00f0ff';
+                connText.innerText = 'HYBRID INTERFACE CONNECTED // GESTURES ENABLED';
+                connText.style.color = '#00f0ff';
+                
+                const landmarks = results.multiHandLandmarks[0];
+                
+                // Draw skeletal connections
+                overlayCtx.strokeStyle = 'rgba(0, 240, 255, 0.7)';
+                overlayCtx.lineWidth = 2;
+                
+                const HAND_CONNECTIONS = [
+                    [0, 1], [1, 2], [2, 3], [3, 4],
+                    [0, 5], [5, 6], [6, 7], [7, 8],
+                    [5, 9], [9, 10], [10, 11], [11, 12],
+                    [9, 13], [13, 14], [14, 15], [15, 16],
+                    [13, 17], [17, 18], [18, 19], [19, 20],
+                    [0, 17]
+                ];
+                
+                HAND_CONNECTIONS.forEach(conn => {
+                    const p1 = landmarks[conn[0]];
+                    const p2 = landmarks[conn[1]];
+                    overlayCtx.beginPath();
+                    overlayCtx.moveTo(p1.x * overlayCanvas.width, p1.y * overlayCanvas.height);
+                    overlayCtx.lineTo(p2.x * overlayCanvas.width, p2.y * overlayCanvas.height);
+                    overlayCtx.stroke();
+                });
+                
+                // Draw landmark points
+                overlayCtx.fillStyle = '#ff007f';
+                landmarks.forEach(lm => {
+                    overlayCtx.beginPath();
+                    overlayCtx.arc(lm.x * overlayCanvas.width, lm.y * overlayCanvas.height, 2, 0, Math.PI * 2);
+                    overlayCtx.fill();
+                });
+
+                // Gesture processing logic (identical wrist-normalized calibration)
+                const wrist = landmarks[0];
+                const middleMcp = landmarks[9];
+                
+                // Absolute pixel calibration metric
+                const calibrationMetric = Math.sqrt(
+                    Math.pow((middleMcp.x - wrist.x) * overlayCanvas.width, 2) +
+                    Math.pow((middleMcp.y - wrist.y) * overlayCanvas.height, 2)
+                );
+                
+                // Extract tip-to-mcp distance metrics
+                const fingerTips = [8, 12, 16, 20];
+                const fingerMcps = [5, 9, 13, 17];
+                
+                let sumFingers = 0;
+                for (let i = 0; i < 4; i++) {
+                    const tip = landmarks[fingerTips[i]];
+                    const mcp = landmarks[fingerMcps[i]];
+                    const dist = Math.sqrt(
+                        Math.pow((tip.x - mcp.x) * overlayCanvas.width, 2) +
+                        Math.pow((tip.y - mcp.y) * overlayCanvas.height, 2)
+                    );
+                    sumFingers += dist;
+                }
+                
+                // Normalized score: large ratio = open hand, small ratio = fist
+                const normalizedScore = sumFingers / calibrationMetric;
+                
+                if (gameState === 1) { // Apply only when playing
+                    if (normalizedScore > 2.05) { // Open Hand = JUMP
+                        if (player.isDucking) player.unduck();
+                        player.jump();
+                        
+                        telemetryPill.innerText = 'GESTURE: JUMP';
+                        telemetryPill.className = 'status-pill status-active-jump';
+                    } else if (normalizedScore < 0.95) { // Fist = DUCK
+                        player.duck();
+                        
+                        telemetryPill.innerText = 'GESTURE: DUCK';
+                        telemetryPill.className = 'status-pill status-active-duck';
+                    } else { // Normal running state
+                        player.unduck();
+                        
+                        telemetryPill.innerText = 'GESTURE: RUNNING';
+                        telemetryPill.className = 'status-pill';
+                        telemetryPill.style.background = '#535358';
+                    }
+                } else {
+                    // Update telemetry status display even in menu/gameover
+                    if (normalizedScore > 2.05) {
+                        telemetryPill.innerText = 'GESTURE: JUMP';
+                        telemetryPill.className = 'status-pill status-active-jump';
+                    } else if (normalizedScore < 0.95) {
+                        telemetryPill.innerText = 'GESTURE: DUCK';
+                        telemetryPill.className = 'status-pill status-active-duck';
+                    } else {
+                        telemetryPill.innerText = 'GESTURE: RUNNING';
+                        telemetryPill.className = 'status-pill';
+                        telemetryPill.style.background = '#535358';
+                    }
+                }
+            } else {
+                telemetryPill.innerText = 'WEBCAM STABLE';
+                telemetryPill.className = 'status-pill';
+                telemetryPill.style.background = '#535358';
+            }
+            
+            overlayCtx.restore();
+        }
+
+        // Start Webcam Camera utilities
+        const hands = new Hands({
+            locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+        });
+        
+        hands.setOptions({
+            maxNumHands: 1,
+            modelComplexity: 1,
+            minDetectionConfidence: 0.55,
+            minTrackingConfidence: 0.55
+        });
+        
+        hands.onResults(onResults);
+
+        const camera = new Camera(videoElement, {
+            onFrame: async () => {
+                await hands.send({ image: videoElement });
+            },
+            width: 160,
+            height: 120
+        });
+
+        camera.start()
+            .then(() => {
+                isWebcamActive = true;
+                connDot.style.background = '#00f0ff';
+                connText.innerText = 'HYBRID INTERFACE CONNECTED // GESTURES ENABLED';
+                connText.style.color = '#00f0ff';
+                telemetryPill.innerText = 'WEBCAM HUD ACTIVE';
+                telemetryPill.className = 'status-pill';
+                telemetryPill.style.background = '#535358';
+            })
+            .catch(err => {
+                console.warn("Webcam blocked or not available. Running manual keyboard override: ", err);
+                telemetryPill.innerText = 'WEBCAM OFFLINE';
+                telemetryPill.className = 'status-pill status-offline';
+                connDot.style.background = '#7a2214';
+                connText.innerText = 'KEYBOARD OVERRIDE ENGAGED [MANUAL CONTROL]';
+                connText.style.color = '#666688';
+            });
+    </script>
+</body>
+</html>

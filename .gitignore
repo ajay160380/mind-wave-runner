@@ -12,3 +12,4 @@ hand_landmarker.task
 dist/
 build/
 *.spec
+*.sqlite3
