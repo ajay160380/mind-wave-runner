@@ -29,13 +29,23 @@ def main():
     # Initialize Hand Tracker
     hand_tracker = HandTracker()
     
+    # Load background images
+    bg_stars = pygame.image.load("assets/bg_stars.png").convert()
+    bg_mountains = pygame.image.load("assets/bg_mountains.png").convert_alpha()
+    bg_floor = pygame.image.load("assets/bg_floor.png").convert_alpha()
+    
+    # Parallax scrolling coordinates
+    stars_x = 0.0
+    mountains_x = 0.0
+    floor_x = 0.0
+    
     # Main game loop
     running = True
     game_active = True
     
     while running:
         # Get gestures from webcam
-        is_jumping, is_ducking = hand_tracker.process_frame()
+        is_jumping, is_ducking, cam_surface = hand_tracker.process_frame()
         
         # 1. Event Handling
         for event in pygame.event.get():
@@ -71,6 +81,19 @@ def main():
             player.update()
             score += 1
             
+            # Scroll backgrounds at different speeds (Parallax)
+            stars_x -= 0.2
+            if stars_x <= -WIDTH:
+                stars_x = 0.0
+                
+            mountains_x -= 1.0
+            if mountains_x <= -WIDTH:
+                mountains_x = 0.0
+                
+            floor_x -= 5.0
+            if floor_x <= -WIDTH:
+                floor_x = 0.0
+            
             # Spawn obstacles at random intervals
             spawn_timer += 1
             if spawn_timer >= SPAWN_INTERVAL:
@@ -91,10 +114,15 @@ def main():
                     obstacles.remove(obs)
         
         # 3. Render
-        screen.fill(WHITE)
+        # Draw background layers (Parallax)
+        screen.blit(bg_stars, (stars_x, 0))
+        screen.blit(bg_stars, (stars_x + WIDTH, 0))
         
-        # Draw ground line
-        pygame.draw.line(screen, GRAY, (0, HEIGHT - 20), (WIDTH, HEIGHT - 20), 2)
+        screen.blit(bg_mountains, (mountains_x, 0))
+        screen.blit(bg_mountains, (mountains_x + WIDTH, 0))
+        
+        screen.blit(bg_floor, (floor_x, HEIGHT - 100))
+        screen.blit(bg_floor, (floor_x + WIDTH, HEIGHT - 100))
         
         # Draw obstacles
         for obs in obstacles:
@@ -103,8 +131,14 @@ def main():
         # Draw player
         player.draw(screen)
         
+        # Draw the PiP webcam feed in the top right corner
+        if cam_surface:
+            # Draw a glowing cyber cyan border around the PiP
+            pygame.draw.rect(screen, (0, 240, 255), (WIDTH - 182, 18, 164, 124), 2)
+            screen.blit(cam_surface, (WIDTH - 180, 20))
+        
         # Draw Score
-        score_text = font.render(f"Score: {score // 10}", True, BLACK)
+        score_text = font.render(f"Score: {score // 10}", True, WHITE)
         screen.blit(score_text, (20, 20))
         
         # Draw Game Over Text
