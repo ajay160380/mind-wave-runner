@@ -3,15 +3,15 @@ from settings import *
 
 class Player:
     def __init__(self):
-        # Initial size and position
-        self.normal_width = 40
-        self.normal_height = 60
-        self.duck_height = 30
+        # Initial size and position (Upscaled for premium HD rendering)
+        self.normal_width = 64
+        self.normal_height = 96
+        self.duck_height = 48
         
         self.width = self.normal_width
         self.height = self.normal_height
         
-        self.x = 50
+        self.x = 80  # Push slightly forward for better visibility
         self.y = HEIGHT - self.height - 20 # 20 px above bottom
         self.color = BLUE
         
@@ -19,18 +19,20 @@ class Player:
         
         # Physics
         self.vel_y = 0
-        self.gravity = 0.6
+        self.gravity = 0.65
         self.is_ducking = False
         
-        # Load sprite images
+        # Load sprite images (Smooth 4-frame cycle)
         self.images_run = [
-            pygame.image.load("assets/player_run1.png").convert_alpha(),
-            pygame.image.load("assets/player_run2.png").convert_alpha()
+            load_png("assets/player_run1.png"),
+            load_png("assets/player_run2.png"),
+            load_png("assets/player_run3.png"),
+            load_png("assets/player_run4.png")
         ]
-        self.image_jump = pygame.image.load("assets/player_jump.png").convert_alpha()
+        self.image_jump = load_png("assets/player_jump.png")
         self.images_duck = [
-            pygame.image.load("assets/player_duck1.png").convert_alpha(),
-            pygame.image.load("assets/player_duck2.png").convert_alpha()
+            load_png("assets/player_duck1.png"),
+            load_png("assets/player_duck2.png")
         ]
         
         self.animation_index = 0.0
@@ -70,7 +72,7 @@ class Player:
     def jump(self):
         # Only jump if on the ground and not ducking
         if self.y >= self.ground_y and not self.is_ducking:
-            self.vel_y = -12
+            self.vel_y = -15
             
     def duck(self):
         if not self.is_ducking:

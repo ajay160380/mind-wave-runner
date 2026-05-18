@@ -5,282 +5,255 @@ def create_assets():
     # Ensure assets directory exists
     os.makedirs("assets", exist_ok=True)
     
-    # ------------------ PALETTE ------------------
-    CYAN = (0, 240, 255, 255)
-    GLOW_CYAN = (0, 240, 255, 100)
-    DARK_BLUE = (0, 30, 80, 255)
-    LIGHT_BLUE = (0, 102, 255, 255)
-    PINK = (255, 0, 127, 255)
-    GLOW_PINK = (255, 0, 127, 100)
-    NEON_RED = (255, 0, 85, 255)
-    GLOW_RED = (255, 0, 85, 100)
-    DARK_RED = (120, 0, 30, 255)
+    # ------------------ CLASSIC DINO PALETTE ------------------
+    CHARCOAL = (83, 83, 83)        # Classic Dino/Cactus Dark Grey
+    LIGHT_GREY = (247, 247, 247)  # Classic Dino Light Grey Background
+    WHITE = (255, 255, 255)        # Cloud White
+    GOLD = (245, 166, 35)          # Retro Gold Star
+    GOLD_LIGHT = (254, 215, 96)
     TRANSPARENT = (0, 0, 0, 0)
-    DEEP_PURPLE = (8, 0, 21, 255)
-    GRID_PURPLE = (40, 0, 80, 255)
     
     # =========================================================================
-    # 1. PLAYER RUN 1 (40x60) - Cyber Runner Leg Position 1
+    # 1. PIXEL-ART T-REX GENERATOR (64x96, 4-Frame walking loop)
     # =========================================================================
-    im = Image.new("RGBA", (40, 60), TRANSPARENT)
-    draw = ImageDraw.Draw(im)
-    
-    # Head & Helmet (visor)
-    draw.ellipse([12, 4, 28, 20], fill=DARK_BLUE, outline=CYAN, width=2)
-    draw.rectangle([18, 10, 28, 14], fill=CYAN) # Visor glow
-    
-    # Torso
-    draw.rectangle([10, 21, 30, 40], fill=LIGHT_BLUE, outline=CYAN, width=2)
-    # Neon core line
-    draw.line([20, 24, 20, 37], fill=CYAN, width=2)
-    
-    # Legs (Left leg forward, right leg back)
-    # Left Leg (Forward)
-    draw.line([15, 41, 10, 50], fill=CYAN, width=3)
-    draw.line([10, 50, 22, 58], fill=CYAN, width=3)
-    # Right Leg (Back)
-    draw.line([25, 41, 32, 48], fill=CYAN, width=3)
-    draw.line([32, 48, 28, 58], fill=CYAN, width=3)
-    
-    # Arms (Running pose)
-    draw.line([10, 24, 5, 32], fill=CYAN, width=2)
-    draw.line([30, 24, 35, 30], fill=CYAN, width=2)
-    
-    im.save("assets/player_run1.png")
-    
-    # =========================================================================
-    # 2. PLAYER RUN 2 (40x60) - Cyber Runner Leg Position 2
-    # =========================================================================
-    im = Image.new("RGBA", (40, 60), TRANSPARENT)
-    draw = ImageDraw.Draw(im)
-    
-    # Head & Helmet (visor)
-    draw.ellipse([12, 4, 28, 20], fill=DARK_BLUE, outline=CYAN, width=2)
-    draw.rectangle([18, 10, 28, 14], fill=CYAN)
-    
-    # Torso
-    draw.rectangle([10, 21, 30, 40], fill=LIGHT_BLUE, outline=CYAN, width=2)
-    draw.line([20, 24, 20, 37], fill=CYAN, width=2)
-    
-    # Legs (Right leg forward, left leg back)
-    # Left Leg (Back)
-    draw.line([15, 41, 8, 48], fill=CYAN, width=3)
-    draw.line([8, 48, 12, 58], fill=CYAN, width=3)
-    # Right Leg (Forward)
-    draw.line([25, 41, 30, 50], fill=CYAN, width=3)
-    draw.line([30, 50, 18, 58], fill=CYAN, width=3)
-    
-    # Arms (Running pose alternate)
-    draw.line([10, 24, 4, 30], fill=CYAN, width=2)
-    draw.line([30, 24, 36, 32], fill=CYAN, width=2)
-    
-    im.save("assets/player_run2.png")
-    
-    # =========================================================================
-    # 3. PLAYER JUMP (40x60) - Dynamic Jump Pose
-    # =========================================================================
-    im = Image.new("RGBA", (40, 60), TRANSPARENT)
-    draw = ImageDraw.Draw(im)
-    
-    # Head tilted slightly back
-    draw.ellipse([12, 2, 28, 18], fill=DARK_BLUE, outline=CYAN, width=2)
-    draw.rectangle([18, 6, 28, 10], fill=CYAN)
-    
-    # Torso angled
-    draw.polygon([(10, 19), (30, 19), (28, 38), (8, 38)], fill=LIGHT_BLUE, outline=CYAN)
-    draw.line([19, 21, 18, 36], fill=CYAN, width=2)
-    
-    # Legs bent up
-    draw.line([12, 39, 6, 45], fill=CYAN, width=3)
-    draw.line([6, 45, 14, 52], fill=CYAN, width=3)
-    
-    draw.line([26, 39, 32, 45], fill=CYAN, width=3)
-    draw.line([32, 45, 24, 52], fill=CYAN, width=3)
-    
-    # Arms up/back
-    draw.line([10, 22, 2, 14], fill=CYAN, width=2)
-    draw.line([30, 22, 38, 14], fill=CYAN, width=2)
-    
-    im.save("assets/player_jump.png")
-    
-    # =========================================================================
-    # 4. PLAYER DUCK 1 (40x30) - Cyber Slide Pose 1
-    # =========================================================================
-    im = Image.new("RGBA", (40, 30), TRANSPARENT)
-    draw = ImageDraw.Draw(im)
-    
-    # Head & Helmet positioned low and forward
-    draw.ellipse([20, 4, 36, 20], fill=DARK_BLUE, outline=CYAN, width=2)
-    draw.rectangle([26, 10, 36, 14], fill=CYAN)
-    
-    # Torso horizontal
-    draw.rectangle([6, 12, 22, 26], fill=LIGHT_BLUE, outline=CYAN, width=2)
-    draw.line([10, 19, 18, 19], fill=CYAN, width=2)
-    
-    # Legs tucked behind
-    draw.line([6, 19, 1, 14], fill=CYAN, width=3)
-    draw.line([1, 14, 4, 25], fill=CYAN, width=3)
-    
-    im.save("assets/player_duck1.png")
-    
-    # =========================================================================
-    # 5. PLAYER DUCK 2 (40x30) - Cyber Slide Pose 2 (Leg flicker)
-    # =========================================================================
-    im = Image.new("RGBA", (40, 30), TRANSPARENT)
-    draw = ImageDraw.Draw(im)
-    
-    # Head & Helmet positioned low and forward
-    draw.ellipse([20, 4, 36, 20], fill=DARK_BLUE, outline=CYAN, width=2)
-    draw.rectangle([26, 10, 36, 14], fill=CYAN)
-    
-    # Torso horizontal
-    draw.rectangle([6, 12, 22, 26], fill=LIGHT_BLUE, outline=CYAN, width=2)
-    draw.line([10, 19, 18, 19], fill=CYAN, width=2)
-    
-    # Legs tucked behind (alternate frame)
-    draw.line([6, 19, 2, 22], fill=CYAN, width=3)
-    draw.line([2, 22, 0, 16], fill=CYAN, width=3)
-    
-    im.save("assets/player_duck2.png")
-    
-    # =========================================================================
-    # 6. OBSTACLE TALL (30x70) - Laser Barrier
-    # =========================================================================
-    im = Image.new("RGBA", (30, 70), TRANSPARENT)
-    draw = ImageDraw.Draw(im)
-    
-    # Outer cage
-    draw.rectangle([4, 4, 26, 66], outline=NEON_RED, fill=DARK_RED, width=2)
-    # Glowing diagonal laser lines
-    draw.line([4, 15, 26, 25], fill=PINK, width=2)
-    draw.line([4, 35, 26, 45], fill=PINK, width=2)
-    draw.line([4, 55, 26, 65], fill=PINK, width=2)
-    # Center core glows neon red
-    draw.rectangle([12, 10, 18, 60], fill=PINK)
-    
-    im.save("assets/obstacle_tall.png")
-    
-    # =========================================================================
-    # 7. OBSTACLE WIDE (45x45) - Cyber Spiked Drone
-    # =========================================================================
-    im = Image.new("RGBA", (45, 45), TRANSPARENT)
-    draw = ImageDraw.Draw(im)
-    
-    # Center sphere
-    draw.ellipse([10, 10, 35, 35], fill=DARK_RED, outline=NEON_RED, width=3)
-    # Glowing core
-    draw.ellipse([17, 17, 28, 28], fill=PINK)
-    
-    # Spikes (lines radiating outward)
-    spikes = [
-        ([22, 10], [22, 2]),    # Top
-        ([22, 35], [22, 43]),   # Bottom
-        ([10, 22], [2, 22]),    # Left
-        ([35, 22], [43, 22]),   # Right
-        ([13, 13], [6, 6]),     # Top-Left
-        ([31, 13], [38, 6]),     # Top-Right
-        ([13, 31], [6, 38]),     # Bottom-Left
-        ([31, 31], [38, 38])     # Bottom-Right
-    ]
-    for start, end in spikes:
-        draw.line(start + end, fill=NEON_RED, width=3)
+    def draw_pixel_rex(leg_pose="run1"):
+        im = Image.new("RGBA", (64, 96), TRANSPARENT)
+        draw = ImageDraw.Draw(im)
         
-    im.save("assets/obstacle_wide.png")
-    
-    # =========================================================================
-    # 8. OBSTACLE SMALL (25x40) - Cyber Cactus / Neon Spike
-    # =========================================================================
-    im = Image.new("RGBA", (25, 40), TRANSPARENT)
-    draw = ImageDraw.Draw(im)
-    
-    # Base spike
-    draw.polygon([(12, 2), (2, 38), (22, 38)], fill=DARK_RED, outline=NEON_RED)
-    draw.line([12, 5, 12, 37], fill=PINK, width=2)
-    
-    # Mini side spikes
-    draw.line([7, 20, 1, 15], fill=NEON_RED, width=2)
-    draw.line([17, 25, 23, 20], fill=NEON_RED, width=2)
-    
-    im.save("assets/obstacle_small.png")
-    
-    # =========================================================================
-    # 9. BACKGROUND STARS (800x400) - Starry Synthwave Space
-    # =========================================================================
-    im = Image.new("RGBA", (800, 400), DEEP_PURPLE)
-    draw = ImageDraw.Draw(im)
-    
-    # Draw a soft radial sun gradient near the bottom center
-    import math
-    sun_x, sun_y = 400, 300
-    for r in range(120, 0, -2):
-        alpha = int((1.0 - (r / 120.0)) * 60)
-        sun_color = (255, 0, 127, alpha)
-        # Create a layered ellipse
-        draw.ellipse([sun_x - r, sun_y - r, sun_x + r, sun_y + r], fill=sun_color)
+        # Draw T-Rex Body Silhouette block-by-block (Classic 8-bit Pixel look)
+        # 1. Snout & Head (Top)
+        draw.rectangle([24, 8, 56, 32], fill=CHARCOAL)
+        # Eye (White pixel cutout)
+        draw.rectangle([44, 12, 48, 16], fill=LIGHT_GREY)
+        # Lower Jaw
+        draw.rectangle([24, 28, 48, 36], fill=CHARCOAL)
         
-    # Draw lines cut into the sun (classic synthwave retro sun)
-    for y_cut in range(sun_y - 120, sun_y + 120, 15):
-        thick = int((y_cut - (sun_y - 120)) / 15.0) + 1
-        draw.line([sun_x - 130, y_cut, sun_x + 130, y_cut], fill=DEEP_PURPLE, width=thick)
+        # 2. Neck
+        draw.rectangle([20, 32, 36, 44], fill=CHARCOAL)
         
-    # Generate random starry pixels
-    import random
-    random.seed(42) # Deterministic stars
-    for _ in range(80):
-        sx = random.randint(0, 799)
-        sy = random.randint(0, 260)
-        s_size = random.choice([1, 2])
-        color = random.choice([CYAN, PINK, (255, 255, 255, 255)])
-        if s_size == 1:
-            draw.point((sx, sy), fill=color)
-        else:
-            draw.ellipse([sx, sy, sx+1, sy+1], fill=color)
+        # 3. Body
+        draw.rectangle([16, 40, 40, 68], fill=CHARCOAL)
+        
+        # 4. Cute Tiny T-Rex Arms
+        draw.rectangle([40, 44, 48, 48], fill=CHARCOAL)
+        draw.rectangle([44, 48, 48, 52], fill=CHARCOAL)
+        
+        # 5. Long Tail
+        draw.rectangle([0, 48, 16, 60], fill=CHARCOAL)
+        draw.rectangle([4, 44, 12, 48], fill=CHARCOAL)
+        draw.rectangle([0, 56, 8, 64], fill=CHARCOAL)
+        
+        # 6. Leg Animation Cycles
+        if leg_pose == "run1":
+            # Left leg down, right leg up
+            draw.rectangle([20, 68, 28, 88], fill=CHARCOAL)
+            draw.rectangle([28, 84, 36, 88], fill=CHARCOAL) # Foot
             
-    im.save("assets/bg_stars.png")
-    
-    # =========================================================================
-    # 10. BACKGROUND MOUNTAINS (800x400) - Synthwave Neon Mountain Grid
-    # =========================================================================
-    im = Image.new("RGBA", (800, 400), TRANSPARENT)
-    draw = ImageDraw.Draw(im)
-    
-    # Vector digital mountains outlines
-    # Mountain 1 (Left)
-    draw.polygon([(0, 380), (150, 160), (300, 380)], fill=(20, 0, 40, 200), outline=PINK)
-    draw.line([150, 160, 150, 380], fill=GLOW_PINK, width=2)
-    # Mountain 2 (Right)
-    draw.polygon([(500, 380), (680, 120), (800, 380)], fill=(20, 0, 40, 200), outline=PINK)
-    draw.line([680, 120, 680, 380], fill=GLOW_PINK, width=2)
-    # Mountain 3 (Center, slightly behind)
-    draw.polygon([(200, 380), (420, 180), (600, 380)], fill=(10, 0, 30, 200), outline=CYAN)
-    draw.line([420, 180, 420, 380], fill=GLOW_CYAN, width=2)
-    
-    im.save("assets/bg_mountains.png")
-    
-    # =========================================================================
-    # 11. NEON FLOOR (800x100) - Retro Floor Grid
-    # =========================================================================
-    im = Image.new("RGBA", (800, 100), DEEP_PURPLE)
-    draw = ImageDraw.Draw(im)
-    
-    # Top border line (glowing cyan floor line)
-    draw.line([0, 2, 800, 2], fill=CYAN, width=4)
-    draw.line([0, 4, 800, 4], fill=GLOW_CYAN, width=8)
-    
-    # Horizontal grid lines with perspective spacing
-    grid_y_positions = [2, 10, 22, 38, 58, 82, 100]
-    for gy in grid_y_positions:
-        draw.line([0, gy, 800, gy], fill=GRID_PURPLE, width=2)
+            draw.rectangle([32, 68, 40, 76], fill=CHARCOAL)
+        elif leg_pose == "run2":
+            # Left leg up, right leg down
+            draw.rectangle([20, 68, 28, 76], fill=CHARCOAL)
+            
+            draw.rectangle([32, 68, 40, 88], fill=CHARCOAL)
+            draw.rectangle([40, 84, 48, 88], fill=CHARCOAL) # Foot
+        elif leg_pose == "run3":
+            # Both legs down (Passing pose)
+            draw.rectangle([20, 68, 28, 88], fill=CHARCOAL)
+            draw.rectangle([28, 84, 36, 88], fill=CHARCOAL)
+            
+            draw.rectangle([32, 68, 40, 88], fill=CHARCOAL)
+            draw.rectangle([40, 84, 48, 88], fill=CHARCOAL)
+        elif leg_pose == "run4":
+            # Running step 2
+            draw.rectangle([18, 68, 26, 88], fill=CHARCOAL)
+            draw.rectangle([26, 84, 34, 88], fill=CHARCOAL)
+            
+            draw.rectangle([34, 68, 42, 80], fill=CHARCOAL)
+        elif leg_pose == "jump":
+            # Tucked up legs
+            draw.rectangle([20, 68, 28, 80], fill=CHARCOAL)
+            draw.rectangle([32, 68, 40, 80], fill=CHARCOAL)
+            
+        return im
         
-    # Perspective vanishing lines (vertical perspective)
-    for offset in range(-400, 1200, 80):
-        # Line from horizon point (vanishing point at screen width/2, height=0) to bottom edge
-        # Horizon vanishing point is (400, 2)
-        draw.line([400, 2, offset, 100], fill=GRID_PURPLE, width=2)
+    for frame_idx, p in enumerate(["run1", "run2", "run3", "run4"]):
+        im_run = draw_pixel_rex(p)
+        im_run.save(f"assets/player_run{frame_idx+1}.png")
         
-    im.save("assets/bg_floor.png")
+    im_jump = draw_pixel_rex("jump")
+    im_jump.save("assets/player_jump.png")
     
-    print("All custom assets successfully created inside assets/ directory!")
+    # =========================================================================
+    # 2. PIXEL-ART DUCKING T-REX GENERATOR (64x48, 2-Frame sliding loop)
+    # =========================================================================
+    def draw_pixel_duck(pose="duck1"):
+        im = Image.new("RGBA", (64, 48), TRANSPARENT)
+        draw = ImageDraw.Draw(im)
+        
+        # Lower T-Rex Bowed Head (Extended snout forward)
+        draw.rectangle([32, 12, 64, 30], fill=CHARCOAL)
+        draw.rectangle([52, 16, 56, 20], fill=LIGHT_GREY) # Eye
+        draw.rectangle([32, 26, 56, 34], fill=CHARCOAL)
+        
+        # Horizontal low body
+        draw.rectangle([12, 20, 36, 40], fill=CHARCOAL)
+        
+        # Tail
+        draw.rectangle([0, 24, 12, 34], fill=CHARCOAL)
+        draw.rectangle([0, 32, 8, 38], fill=CHARCOAL)
+        
+        # Moving running legs (crouched low)
+        if pose == "duck1":
+            draw.rectangle([16, 40, 24, 46], fill=CHARCOAL)
+            draw.rectangle([24, 44, 28, 46], fill=CHARCOAL)
+        else:
+            draw.rectangle([26, 40, 34, 46], fill=CHARCOAL)
+            draw.rectangle([34, 44, 38, 46], fill=CHARCOAL)
+            
+        return im
+        
+    im_d1 = draw_pixel_duck("duck1")
+    im_d1.save("assets/player_duck1.png")
+    
+    im_d2 = draw_pixel_duck("duck2")
+    im_d2.save("assets/player_duck2.png")
+    
+    # =========================================================================
+    # 3. CLASSIC SINGLE CACTUS (40x60)
+    # =========================================================================
+    im_small = Image.new("RGBA", (40, 60), TRANSPARENT)
+    draw_small = ImageDraw.Draw(im_small)
+    
+    # Center Stem
+    draw_small.rectangle([16, 0, 24, 60], fill=CHARCOAL)
+    # Left Arm
+    draw_small.rectangle([6, 18, 16, 24], fill=CHARCOAL)
+    draw_small.rectangle([6, 8, 12, 24], fill=CHARCOAL)
+    # Right Arm
+    draw_small.rectangle([24, 28, 34, 34], fill=CHARCOAL)
+    draw_small.rectangle([28, 18, 34, 34], fill=CHARCOAL)
+    
+    im_small.save("assets/obstacle_small.png")
+    
+    # =========================================================================
+    # 4. CLASSIC CACTI CLUSTER (45x100)
+    # =========================================================================
+    im_tall = Image.new("RGBA", (45, 100), TRANSPARENT)
+    draw_tall = ImageDraw.Draw(im_tall)
+    
+    # 1. Tall Main Cactus
+    draw_tall.rectangle([22, 0, 30, 100], fill=CHARCOAL)
+    # Left Arm
+    draw_tall.rectangle([12, 30, 22, 38], fill=CHARCOAL)
+    draw_tall.rectangle([12, 16, 18, 38], fill=CHARCOAL)
+    # Right Arm
+    draw_tall.rectangle([30, 44, 40, 52], fill=CHARCOAL)
+    draw_tall.rectangle([34, 30, 40, 52], fill=CHARCOAL)
+    
+    # 2. Smaller Cactus clustered beside it
+    draw_tall.rectangle([4, 40, 12, 100], fill=CHARCOAL)
+    # Right Arm of small cactus overlapping
+    draw_tall.rectangle([12, 60, 18, 66], fill=CHARCOAL)
+    draw_tall.rectangle([14, 52, 18, 66], fill=CHARCOAL)
+    
+    im_tall.save("assets/obstacle_tall.png")
+    
+    # =========================================================================
+    # 5. FLAPPING PTERODACTYL DINOSAUR (60x60)
+    # =========================================================================
+    im_wide = Image.new("RGBA", (60, 60), TRANSPARENT)
+    draw_wide = ImageDraw.Draw(im_wide)
+    
+    # Head & Beak pointing Left
+    draw_wide.rectangle([12, 22, 28, 30], fill=CHARCOAL)
+    draw_wide.rectangle([18, 20, 24, 24], fill=CHARCOAL) # Head bump
+    draw_wide.polygon([(12, 24), (2, 26), (12, 28)], fill=CHARCOAL) # Beak
+    
+    # Body
+    draw_wide.rectangle([28, 24, 46, 32], fill=CHARCOAL)
+    
+    # Pixel Tail
+    draw_wide.polygon([(46, 26), (54, 28), (46, 30)], fill=CHARCOAL)
+    
+    # Retro Wings Spread
+    draw_wide.polygon([(30, 24), (36, 4), (42, 24)], fill=CHARCOAL)   # Wing 1 (Up)
+    draw_wide.polygon([(30, 32), (36, 52), (42, 32)], fill=CHARCOAL)  # Wing 2 (Down)
+    
+    im_wide.save("assets/obstacle_wide.png")
+    
+    # =========================================================================
+    # 6. DINO SKY & PIXEL CLOUDS (800x400)
+    # =========================================================================
+    im_sky = Image.new("RGBA", (800, 400), TRANSPARENT)
+    draw_sky = ImageDraw.Draw(im_sky)
+    
+    # Clean solid classic Dino light background
+    draw_sky.rectangle([0, 0, 800, 400], fill=LIGHT_GREY)
+    
+    # Draw cute, clean, pixelated white clouds floating in the sky
+    def draw_pixel_cloud(cx, cy):
+        draw_sky.rectangle([cx, cy, cx + 70, cy + 20], fill=WHITE)
+        draw_sky.rectangle([cx + 10, cy - 10, cx + 50, cy], fill=WHITE)
+        draw_sky.rectangle([cx + 20, cy - 15, cx + 40, cy - 10], fill=WHITE)
+        draw_sky.rectangle([cx - 5, cy + 5, cx + 75, cy + 20], fill=WHITE)
+        
+    draw_pixel_cloud(120, 70)
+    draw_pixel_cloud(440, 45)
+    draw_pixel_cloud(680, 85)
+    
+    im_sky.save("assets/bg_stars.png")
+    
+    # =========================================================================
+    # 7. MINIMALIST DISTANT HILLS (800x400)
+    # =========================================================================
+    im_hills = Image.new("RGBA", (800, 400), TRANSPARENT)
+    draw_hills = ImageDraw.Draw(im_hills)
+    
+    # Just draw extremely faint, clean classic grey lines in the far background
+    # Small bushes/hills
+    def draw_pixel_hill(hx, hy, hw, hh):
+        draw_hills.ellipse([hx, hy - hh, hx + hw, hy + hh], fill=(235, 235, 235))
+        draw_hills.arc([hx, hy - hh, hx + hw, hy + hh], start=180, end=360, fill=(210, 210, 210), width=1)
+        
+    draw_pixel_hill(80, 360, 160, 45)
+    draw_pixel_hill(540, 360, 200, 60)
+    
+    im_hills.save("assets/bg_mountains.png")
+    
+    # =========================================================================
+    # 8. CLASSIC DOTTED HORIZON ROAD GRID (800x100)
+    # =========================================================================
+    im_floor = Image.new("RGBA", (800, 100), TRANSPARENT)
+    draw_floor = ImageDraw.Draw(im_floor)
+    
+    # A single solid horizontal line for the road
+    draw_floor.line([0, 0, 800, 0], fill=CHARCOAL, width=2)
+    
+    # Scattered cute classic ground dots/bumps
+    import random
+    random.seed(42)
+    for _ in range(35):
+        gx = random.randint(0, 799)
+        gy = random.randint(5, 45)
+        length = random.choice([2, 4, 6])
+        draw_floor.line([gx, gy, gx + length, gy], fill=CHARCOAL, width=1)
+        
+    im_floor.save("assets/bg_floor.png")
+    
+    # =========================================================================
+    # 9. GOLD STAR COLLECTIBLE (25x25)
+    # =========================================================================
+    im_core = Image.new("RGBA", (25, 25), TRANSPARENT)
+    draw_core = ImageDraw.Draw(im_core)
+    
+    # Golden star pixel-style shape
+    draw_core.ellipse([2, 2, 23, 23], fill=GOLD)
+    draw_core.ellipse([5, 5, 20, 20], fill=GOLD_LIGHT)
+    draw_core.polygon([(12, 5), (15, 11), (21, 11), (16, 15), (18, 21), (12, 17), (6, 21), (8, 15), (3, 11), (9, 11)], fill=WHITE)
+    
+    im_core.save("assets/data_core.png")
+    
+    print("All Chrome Dino minimalist pixel-art assets successfully generated inside assets/ directory!")
 
 if __name__ == "__main__":
     create_assets()
