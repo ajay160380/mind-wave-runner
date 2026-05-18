@@ -1,5 +1,6 @@
 import cv2
 import mediapipe as mp
+import pygame
 
 class HandTracker:
     def __init__(self):
@@ -16,7 +17,7 @@ class HandTracker:
     def process_frame(self):
         success, image = self.cap.read()
         if not success:
-            return False, False
+            return False, False, None
             
         # Flip the image horizontally for a selfie-view display
         image = cv2.flip(image, 1)
@@ -48,12 +49,24 @@ class HandTracker:
                 elif index_tip_y > index_mcp_y:
                     is_ducking = True
                     
-        # Show debug window
-        cv2.imshow("Hand Tracking (Debug)", image)
-        cv2.waitKey(1)
+        # Convert the OpenCV image to a Pygame Surface for PiP display
+        # First, convert OpenCV BGR to RGB
+        image_pip_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        # Convert to Pygame Surface
+        try:
+            cam_surface = pygame.image.frombuffer(
+                image_pip_rgb.tobytes(), 
+                image_pip_rgb.shape[1::-1], 
+                "RGB"
+            )
+            # Scale down to 160x120 for PiP
+            cam_surface = pygame.transform.scale(cam_surface, (160, 120))
+        except Exception:
+            cam_surface = None
         
-        return is_jumping, is_ducking
+        return is_jumping, is_ducking, cam_surface
         
     def release(self):
         self.cap.release()
         cv2.destroyAllWindows()
+
