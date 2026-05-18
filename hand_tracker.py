@@ -1,13 +1,31 @@
-import cv2
-import mediapipe as mp
 import pygame
 import threading
 import time
 import math
 from settings import resource_path
 
+try:
+    import cv2
+    import mediapipe as mp
+    CAMERA_CV_AVAILABLE = True
+except ImportError:
+    CAMERA_CV_AVAILABLE = False
+
 class HandTracker:
     def __init__(self):
+        # Thread-safe synchronization variables
+        self.lock = threading.Lock()
+        self.is_jumping = False
+        self.is_ducking = False
+        self.cam_surface = None
+        self.running = True
+        
+        if not CAMERA_CV_AVAILABLE:
+            print("Webcam CV/MediaPipe libraries not available. Keyboard-only mode activated.")
+            self.cap = None
+            self.landmarker = None
+            return
+
         # Open default webcam capture
         self.cap = cv2.VideoCapture(0)
         
@@ -32,13 +50,6 @@ class HandTracker:
             (13, 17), (17, 18), (18, 19), (19, 20),
             (0, 17)
         ]
-        
-        # Thread-safe synchronization variables
-        self.lock = threading.Lock()
-        self.is_jumping = False
-        self.is_ducking = False
-        self.cam_surface = None
-        self.running = True
         
         # Start dedicated background thread
         self.thread = threading.Thread(target=self._background_loop, daemon=True)
