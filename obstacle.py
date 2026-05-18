@@ -6,16 +6,34 @@ class Obstacle:
     """A single obstacle that moves from right to left across the screen."""
     
     def __init__(self):
-        # Random size for variety
-        self.width = random.randint(20, 40)
-        self.height = random.randint(30, 70)
+        # Choose a random type of obstacle
+        self.type = random.choice(['small', 'tall', 'wide'])
+        
+        if self.type == 'small':
+            self.image = pygame.image.load("assets/obstacle_small.png").convert_alpha()
+            self.width = 25
+            self.height = 40
+            self.y = HEIGHT - self.height - 20  # Grounded
+        elif self.type == 'tall':
+            self.image = pygame.image.load("assets/obstacle_tall.png").convert_alpha()
+            self.width = 30
+            self.height = 70
+            self.y = HEIGHT - self.height - 20  # Grounded
+        elif self.type == 'wide':
+            self.image = pygame.image.load("assets/obstacle_wide.png").convert_alpha()
+            self.width = 45
+            self.height = 45
+            # Floating drone: duck under it!
+            # Standing player y = HEIGHT - 60 - 20 = HEIGHT - 80 (top at HEIGHT - 80)
+            # Ducking player y = HEIGHT - 30 - 20 = HEIGHT - 50 (top at HEIGHT - 50)
+            # Drone y = HEIGHT - 100, height = 45, so bottom is HEIGHT - 55.
+            # Standing player (top HEIGHT-80) collides; ducking player (top HEIGHT-50) passes under.
+            self.y = HEIGHT - 100
         
         # Start off-screen to the right
         self.x = WIDTH + random.randint(0, 100)
-        self.y = HEIGHT - self.height - 20  # Same ground level as player
         
         self.speed = 5  # Horizontal speed (pixels per frame)
-        self.color = RED
         
         # Collision rect
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
@@ -30,5 +48,5 @@ class Obstacle:
         return self.x + self.width < 0
     
     def draw(self, screen):
-        """Render the obstacle as a red rectangle."""
-        pygame.draw.rect(screen, self.color, self.rect)
+        """Render the obstacle using its sprite."""
+        screen.blit(self.image, self.rect)
