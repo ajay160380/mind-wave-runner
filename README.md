@@ -5,7 +5,6 @@ The unique twist? It uses your laptop's webcam and **Google MediaPipe Tasks API*
 
 ---
 
-
 ## 🎮 Game Controls & Protocol
 
 ### 🖐️ Gesture Control Protocol (Webcam HUD)
